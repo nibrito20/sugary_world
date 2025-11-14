@@ -10,9 +10,10 @@ typedef struct Platform {
 
 typedef enum GameScreen {
     TITLE = 0,
-    GAMEPLAY_FASE1,
-    GAMEPLAY_FASE2,
-    ENDING
+    CONTEXT,
+    FASE1,
+    ENDING_SCREEN,
+    EXITING
 } GameScreen;
 
 typedef struct Player {
@@ -29,6 +30,6 @@ typedef struct Player {
 #define MAX_PLATFORMS 50
 
 void InitFase1(Platform platforms[]);
-void UpdateDrawFase1(Player *player, Camera2D *camera, Platform platforms[], int numPlatforms);
+GameScreen UpdateDrawFase1(Player *player, Camera2D *camera, Platform platforms[], int numPlatforms);
 
 #endif

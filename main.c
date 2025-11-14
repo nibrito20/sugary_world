@@ -1,11 +1,37 @@
+#include <stdio.h>
 #include "raylib.h"
+#include "include/game_data.h"
 
-typedef struct Platform{
-    Rectangle rect;
-    Color color;
-}Platform;
+Player gamePlayer = { 0 };
+Camera2D mainCamera = { 0 };
+Platform fase1_platforms[MAX_PLATFORMS];
+static Texture2D cursorTexture;
+static Texture2D backgroundContextTexture;
+static Texture2D playerContextTexture;
+static Texture2D padariaContextTexture;
+#define CURSOR_SCALE 0.1f
 
-#define MAX_PLATAFORMAS 10
+static int currentFalas = 0;
+const char *falas[] = {
+    "Olá, pessoal! Meu nome é Taylor, \ne eu sou dona da padaria mais doce \nde todo o Sugary World.",
+
+    "As pessoas dizem que meus bolos \nsão tão deliciosos que fazem quem \nprova flutuar de felicidade!",
+
+    "Essas receitas são muito especiais, \nforam passadas de geração em \ngeração, desde a época da \nminha tataravó",
+
+    "Mas… algo terrível aconteceu!",
+    "O meu livro de receitas foi \nroubado!!",
+
+    "Você precisa me ajudar a \nrecuperá-lo!",
+    "Eu não posso deixar que os \nsabores do Sugary World \ndesapareçam!",
+    "Ok! Vamos nessa!",
+    "Eu tenho uma pista de onde o \nladrão pode ter fugido com o livro…",
+    "O Parque de Pirulitos!",
+    "É um lugar enorme, cheio de doces \ncoloridos e segredos escondidos…",
+    "Se encontrarmos algo por lá, \ntalvez possamos descobrir \nquem levou minhas receitas!",
+    "Pegue seu avental, aventureiro! \nA nossa jornada açucarada está \napenas começando..."
+};
+#define NUM_FALAS (sizeof(falas) / sizeof(falas[0]))
 
 int main(void){
 
@@ -13,93 +39,185 @@ int main(void){
     const int screenHeight = 800;
 
     InitWindow(screenWidth, screenHeight, "Sugary World");
-    
-    Texture2D player = LoadTexture("sprites/taylor_direita.png");
-    float scale = 3.0f;
-    Vector2 pos = { 400, 225 };
+    SetTargetFPS(60);
+    GameScreen currentScreen = TITLE;
 
-    const float speed = 200.0f;
-    float gravity = 1200.0f;
-    float velocityY = 0.0f;
-    float jumpForce = -600.0f;
-    
-    float playerHeight = player.height * scale;
-    
-    Platform plataformas[MAX_PLATAFORMAS] = {
-        { { 0, 750, 1280, 50 }, LIGHTGRAY },
-        { { 300, 680, 200, 20 }, DARKGRAY },
-        { { 550, 550, 150, 20 }, DARKGRAY },
-        { { 100, 400, 100, 20 }, DARKGRAY }
+    Rectangle startButton = {
+        (float)screenWidth/2 - 150,
+        (float)screenHeight/2 + 100,
+        300,
+        60
     };
 
-    Camera2D camera = { 0 };
-    camera.target = (Vector2){ pos.x + 20.0f, pos.y + 20.0f };
-    camera.offset = (Vector2){ screenWidth/2.0f, screenHeight/2.0f };
-    camera.zoom = 1.0f;
-    SetTargetFPS(60);
+    Color buttonColor = PINK;
+    Color hoverColor = SKYBLUE;
+    HideCursor();
 
-    bool estavaNoChaoNoFrameAnterior = false;
+    cursorTexture = LoadTexture("sprites/cursor.png"); 
+    backgroundContextTexture = LoadTexture("sprites/context_background.png");
+    playerContextTexture = LoadTexture("sprites/taylor_frente.png");
+    padariaContextTexture = LoadTexture("sprites/padaria_context.png");
 
-    while (!WindowShouldClose()){
+    while(currentScreen != EXITING && !WindowShouldClose()){
+        Vector2 mousePoint = GetMousePosition();
+        switch(currentScreen){
+            case TITLE:{
+                Color btnDrawColor = buttonColor;
+                bool isMouseOver = CheckCollisionPointRec(mousePoint, startButton);
 
-        float deltaTime = GetFrameTime();
+                if (isMouseOver) {
+                    btnDrawColor = hoverColor;
+                    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                        currentScreen = CONTEXT;
+                    }
+                }
+                BeginDrawing();  
+                    ClearBackground(RAYWHITE);
 
-        if (IsKeyDown(KEY_RIGHT)) pos.x += speed * deltaTime;
-        if (IsKeyDown(KEY_LEFT))  pos.x -= speed * deltaTime;
+                    DrawText("SUGARY WORLD", 
+                            screenWidth/2 - MeasureText("SUGARY WORLD", 60)/2, 
+                            screenHeight/4, 60, PINK);
+                            
+                    DrawRectangleRec(startButton, btnDrawColor);
 
-        float playerWidth = player.width * scale;
-        float playerHeight = player.height * scale;
-        velocityY += gravity * deltaTime;
-        pos.y += velocityY * deltaTime;
+                    DrawText("COMEÇAR JOGO", 
+                             startButton.x + startButton.width/2 - MeasureText("COMEÇAR JOGO", 30)/2, 
+                             startButton.y + 15, 30, RAYWHITE);
 
-        Rectangle playerRect = { 
-            pos.x - (playerWidth / 2.0f), 
-            pos.y - (playerHeight / 2.0f), 
-            playerWidth, 
-            playerHeight 
-        };
-        
-        bool estaNoChao = false;
-        for (int i = 0; i < MAX_PLATAFORMAS; i++) {
-            Platform p = plataformas[i];
-            
-            if (CheckCollisionRecs(playerRect, p.rect)) {
+                    DrawTextureEx(
+                        cursorTexture,
+                        mousePoint,
+                        0.0f,
+                        CURSOR_SCALE,
+                        WHITE
+                    );
+
+                EndDrawing();
+            }break;
+            case CONTEXT:{
+                if (IsKeyPressed(KEY_ENTER) || IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                    if (currentFalas < NUM_FALAS - 1) {
+                        currentFalas++; 
+                    } else {
+                        currentScreen = FASE1;
+                        //InitFase1(fase1_platforms); 
+                        currentFalas = 0;
+                    }
+                }
+                const float screenW = (float)screenWidth;
+                const float screenH = (float)screenHeight;
+
+                const char *currentPrompt = falas[currentFalas];
+                Rectangle bubbleRect = {
+                    screenW * 0.20f,  // Posição X: Começa a 15% da esquerda
+                    screenH * 0.40f,  // Posição Y: Começa a 30% do topo
+                    screenW * 0.35f,  // Largura: Reduzida para 40% da tela
+                    screenH * 0.15f   // Altura: Reduzida para 25% da tela
+                };
+
+                Vector2 triangleV1 = { bubbleRect.x + 10, bubbleRect.y };
+                Vector2 triangleV3 = { bubbleRect.x + 30, bubbleRect.y };
+                Vector2 triangleV2 = { screenW * 0.20f, screenH * 0.60f };//pontos do vértice para o bico da box de fala
+                float roundness = 0.4f;
+                int segments = 10;
+
+                const float TEXT_PADDING = 20.0f; 
+                    
+                Rectangle textRect = {
+                    bubbleRect.x + TEXT_PADDING, 
+                    bubbleRect.y + TEXT_PADDING,
+                    bubbleRect.width - (TEXT_PADDING * 2), // Largura do balão menos as margens laterais
+                    bubbleRect.height - (TEXT_PADDING * 2) // Altura do balão menos as margens superior e inferior
+                };
+                    
+                Rectangle sourceRec = { 0.0f, 0.0f, (float)backgroundContextTexture.width, (float)backgroundContextTexture.height }; //pega a img original
+                Rectangle destRec = { 0.0f, 0.0f, screenW, screenH };//esticar ou diminuir a imagem p caber na janela
+                Vector2 origin = { 0.0f, 0.0f };//define o ponto de origem
+
+                float padariaX = screenW * 0.55f; 
+                float padariaY = screenH * 0.39f;
+                const float PADARIA_SCALE = 0.4f;
+
+                float bonecaX = screenW * 0.08f;
+                float bonecaY = screenH * 0.60f;
+                const float BONECA_SCALE = 7.0f;
+
+                BeginDrawing();
+                    ClearBackground(RAYWHITE);
+                    
+                    DrawTexturePro(backgroundContextTexture,
+                       sourceRec,
+                       destRec,
+                       origin,
+                       0.0f,              
+                       WHITE);
+
+                    DrawTextureEx(playerContextTexture, 
+                      (Vector2){bonecaX, bonecaY},
+                      0.0f,
+                      BONECA_SCALE,
+                      WHITE);
+                    
+                    DrawTextureEx(padariaContextTexture, 
+                      (Vector2){padariaX, padariaY},
+                      0.0f,
+                      PADARIA_SCALE,
+                      WHITE);
+
+                    DrawTriangle(triangleV1, triangleV2, triangleV3, WHITE); // Bico
+                    DrawRectangleRounded(bubbleRect, roundness, segments, WHITE); // Corpo
+
+                    DrawTextEx(GetFontDefault(),
+                        currentPrompt,
+                        (Vector2){ bubbleRect.x + TEXT_PADDING, bubbleRect.y + TEXT_PADDING }, // POSIÇÃO COM MARGEM
+                        24,
+                        2,
+                        DARKGRAY);
+                    
+                    const char *actionText;
+                    if (currentFalas < NUM_FALAS - 1) {
+                        actionText = "Pressione ENTER/Clique para a próxima fala...";
+                    } else {
+                        actionText = "Pressione ENTER/Clique para começar a aventura!";
+                    }
+                    DrawText(actionText, 
+                        screenWidth/2 - MeasureText(actionText, 20)/2,
+                        30, 
+                        20, 
+                        MAROON);
+                               
+                    DrawTextureEx(cursorTexture, mousePoint, 0.0f, CURSOR_SCALE, WHITE); 
+                EndDrawing();
+            } break;
+            // case FASE1:{
+            //     UpdateDrawFase1(&gamePlayer, &mainCamera, fase1_platforms, MAX_PLATFORMS);
+            //     GameScreen nextScreen = UpdateDrawFase1(&gamePlayer, &mainCamera, fase1_platforms, MAX_PLATFORMS);
+            //     if (nextScreen != FASE1) {
+            //         currentScreen = nextScreen;
+            //     }
                 
-                float peJogadorFrameAnterior = (pos.y - velocityY * deltaTime) + (playerHeight / 2.0f);
-                if (velocityY > 0 && peJogadorFrameAnterior <= p.rect.y) {
-                    estaNoChao = true;
-                    velocityY = 0;
-                    pos.y = p.rect.y - (playerHeight / 2.0f);
+            // } break;
+            case ENDING_SCREEN: {
+                if (IsKeyPressed(KEY_ENTER)) {
+                    currentScreen = TITLE; 
                 }
-            }
-        }
-        if (estaNoChao && IsKeyPressed(KEY_UP)){
-            velocityY = jumpForce;
-        }
+                
+                BeginDrawing();
+                    ClearBackground(RAYWHITE);
+                    DrawText("FIM DE JOGO!", 400, 300, 50, RED);
+                EndDrawing();
 
-        if (estavaNoChaoNoFrameAnterior && !estaNoChao && velocityY >= 0){
-            velocityY = 800.0f;
+            } break;
+            
+            case EXITING: {
+            } break;
         }
-        estavaNoChaoNoFrameAnterior = estaNoChao;
-
-        camera.target = pos;
-        
-        BeginDrawing();
-            ClearBackground(RAYWHITE);
-            BeginMode2D(camera);
-                for (int i = 0; i < MAX_PLATAFORMAS; i++) {
-                    DrawRectangleRec(plataformas[i].rect, plataformas[i].color);
-                }
-                DrawTextureEx(player, (Vector2){pos.x - (player.width * scale)/2, pos.y - (player.height * scale)/2 + 8.0f}, 
-                0.0f, 
-                scale, 
-                WHITE);
-        EndMode2D();
-        DrawText("Olá, Sugary World!", 250, 200, 30, PINK);
-        EndDrawing();
     }
-
-    UnloadTexture(player);
+    UnloadTexture(cursorTexture);
+    UnloadTexture(playerContextTexture);
+    UnloadTexture(padariaContextTexture);
+    UnloadTexture(backgroundContextTexture);
+    ShowCursor();
     CloseWindow();
     return 0;
 }
