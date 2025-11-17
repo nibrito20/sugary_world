@@ -7,6 +7,7 @@ Camera2D mainCamera = { 0 };
 Platform fase1_platforms[MAX_PLATFORMS];
 static Texture2D cursorTexture;
 static Texture2D backgroundContextTexture;
+static Texture2D backgroundTitleTexture;
 static Texture2D playerContextTexture;
 static Texture2D padariaContextTexture;
 #define CURSOR_SCALE 0.1f
@@ -14,14 +15,10 @@ static Texture2D padariaContextTexture;
 static int currentFalas = 0;
 const char *falas[] = {
     "Olá, pessoal! Meu nome é Taylor, \ne eu sou dona da padaria mais doce \nde todo o Sugary World.",
-
     "As pessoas dizem que meus bolos \nsão tão deliciosos que fazem quem \nprova flutuar de felicidade!",
-
     "Essas receitas são muito especiais, \nforam passadas de geração em \ngeração, desde a época da \nminha tataravó",
-
     "Mas… algo terrível aconteceu!",
     "O meu livro de receitas foi \nroubado!!",
-
     "Você precisa me ajudar a \nrecuperá-lo!",
     "Eu não posso deixar que os \nsabores do Sugary World \ndesapareçam!",
     "Ok! Vamos nessa!",
@@ -44,7 +41,7 @@ int main(void){
 
     Rectangle startButton = {
         (float)screenWidth/2 - 150,
-        (float)screenHeight/2 + 100,
+        (float)screenHeight/2 + 50,
         300,
         60
     };
@@ -55,6 +52,7 @@ int main(void){
 
     cursorTexture = LoadTexture("sprites/cursor.png"); 
     backgroundContextTexture = LoadTexture("sprites/context_background.png");
+    backgroundTitleTexture = LoadTexture("sprites/backgroundTitle.png");
     playerContextTexture = LoadTexture("sprites/taylor_frente.png");
     padariaContextTexture = LoadTexture("sprites/padaria_context.png");
 
@@ -62,6 +60,8 @@ int main(void){
         Vector2 mousePoint = GetMousePosition();
         switch(currentScreen){
             case TITLE:{
+                const float screenW = (float)screenWidth;
+                const float screenH = (float)screenHeight;
                 Color btnDrawColor = buttonColor;
                 bool isMouseOver = CheckCollisionPointRec(mousePoint, startButton);
 
@@ -71,12 +71,20 @@ int main(void){
                         currentScreen = CONTEXT;
                     }
                 }
+
+                Rectangle sourceRec = { 0.0f, 0.0f, (float)backgroundTitleTexture.width, (float)backgroundTitleTexture.height };
+                Rectangle destRec = { 0.0f, 0.0f, screenW, screenH };
+                Vector2 origin = { 0.0f, 0.0f };
+
                 BeginDrawing();  
                     ClearBackground(RAYWHITE);
 
-                    DrawText("SUGARY WORLD", 
-                            screenWidth/2 - MeasureText("SUGARY WORLD", 60)/2, 
-                            screenHeight/4, 60, PINK);
+                    DrawTexturePro(backgroundTitleTexture,
+                       sourceRec,
+                       destRec,
+                       origin,
+                       0.0f,              
+                       WHITE);
                             
                     DrawRectangleRec(startButton, btnDrawColor);
 
