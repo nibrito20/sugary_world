@@ -8,11 +8,15 @@ static Texture2D  waffleTexture = {0};
 static Texture2D playerTexture = {0};
 static Texture2D candyTexture = {0};
 
+float mensagemContador = 0.0f;
+const float mensagemTempo = 5.0f;
+
 #define NUM_FASE1_PLATFORMS 17
 #define PLAYER_HITBOX_W 32
 #define PLAYER_HITBOX_H 32
 
 Candy *candyList = NULL;
+int candiesCollected = 0;
 
 void AddCandy(float x, float y) {
     Candy *c = malloc(sizeof(Candy));
@@ -57,6 +61,9 @@ void LoadFase1Resources(){
 }
 
 void InitFase1(Player *player, Platform platforms[]){
+
+    mensagemContador = 0.0f;
+
     platforms[0].rect = (Rectangle){ 0, 420, 600, floorTexture.height };
     platforms[0].texture = floorTexture;
 
@@ -81,7 +88,7 @@ void InitFase1(Player *player, Platform platforms[]){
     platforms[7].rect = (Rectangle){ 1900, 230, 100, 20 };
     platforms[7].texture = waffleTexture;
 
-    platforms[8].rect  = (Rectangle){ 800, 140, 100, 20 };
+    platforms[8].rect  = (Rectangle){ 800, 150, 100, 20 };
     platforms[8].texture = waffleTexture;
 
     platforms[9].rect  = (Rectangle){ 1000, 120, 100, 20 };
@@ -127,8 +134,6 @@ void InitFase1(Player *player, Platform platforms[]){
 
 GameScreen UpdateDrawFase1(Player *player, Camera2D *camera, Platform platforms[], int numPlatforms){
 
-    static float mensagemTempo = 5.0f;
-    static float mensagemContador = 0.0f;
     float deltaTime = GetFrameTime();
     mensagemContador += deltaTime;
 
@@ -186,11 +191,22 @@ GameScreen UpdateDrawFase1(Player *player, Camera2D *camera, Platform platforms[
             player->velocityY = 0;
             player->isOnGround = true; 
             
+            if (i == 16) {
+                if (candiesCollected >= 8) {
+                    return FASE2;
+                } else {
+                    return GAME_OVER;
+                }
+            }
         }
     }
 
     if (!player->isOnGround) {
         player->pos.y = newPosY;
+    }
+
+    if (player->pos.y > 900) {
+        return GAME_OVER;
     }
 
     Candy *c = candyList;
@@ -200,6 +216,7 @@ GameScreen UpdateDrawFase1(Player *player, Camera2D *camera, Platform platforms[
         next = c->next;
 
         if (CheckCollisionRecs(playerHitbox, c->rect)) {
+            candiesCollected++;
             RemoveCandy(c);
         }
 

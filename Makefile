@@ -1,6 +1,6 @@
 TARGET = sugary_world
 
-SRC = main.c fase1.c
+SRC = main.c fase1.c fase2.c
 
 # Diretórios da Raylib (Homebrew)
 INCLUDE_PATH = /opt/homebrew/include

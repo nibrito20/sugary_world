@@ -37,8 +37,8 @@ int main(void){
     InitWindow(screenWidth, screenHeight, "Sugary World");
     SetTargetFPS(60);
 
-    mainCamera.target = (Vector2){ 0.0f, 0.0f }; // O alvo inicial (será mudado no FASE1)
-    mainCamera.offset = (Vector2){ (float)screenWidth/2, (float)screenHeight/2 }; // Centraliza o ponto de vista na tela
+    mainCamera.target = (Vector2){ 0.0f, 0.0f };
+    mainCamera.offset = (Vector2){ (float)screenWidth/2, (float)screenHeight/2 };
     mainCamera.rotation = 0.0f;
     mainCamera.zoom = 1.0f;
 
@@ -123,10 +123,10 @@ int main(void){
 
                 const char *currentPrompt = falas[currentFalas];
                 Rectangle bubbleRect = {
-                    screenW * 0.20f,  // Posição X: Começa a 15% da esquerda
-                    screenH * 0.40f,  // Posição Y: Começa a 30% do topo
-                    screenW * 0.35f,  // Largura: Reduzida para 40% da tela
-                    screenH * 0.15f   // Altura: Reduzida para 25% da tela
+                    screenW * 0.20f,
+                    screenH * 0.40f,
+                    screenW * 0.35f,
+                    screenH * 0.15f
                 };
 
                 Vector2 triangleV1 = { bubbleRect.x + 10, bubbleRect.y };
@@ -140,13 +140,13 @@ int main(void){
                 Rectangle textRect = {
                     bubbleRect.x + TEXT_PADDING, 
                     bubbleRect.y + TEXT_PADDING,
-                    bubbleRect.width - (TEXT_PADDING * 2), // Largura do balão menos as margens laterais
-                    bubbleRect.height - (TEXT_PADDING * 2) // Altura do balão menos as margens superior e inferior
+                    bubbleRect.width - (TEXT_PADDING * 2),
+                    bubbleRect.height - (TEXT_PADDING * 2)
                 };
                     
-                Rectangle sourceRec = { 0.0f, 0.0f, (float)backgroundContextTexture.width, (float)backgroundContextTexture.height }; //pega a img original
-                Rectangle destRec = { 0.0f, 0.0f, screenW, screenH };//esticar ou diminuir a imagem p caber na janela
-                Vector2 origin = { 0.0f, 0.0f };//define o ponto de origem
+                Rectangle sourceRec = { 0.0f, 0.0f, (float)backgroundContextTexture.width, (float)backgroundContextTexture.height }; 
+                Rectangle destRec = { 0.0f, 0.0f, screenW, screenH };
+                Vector2 origin = { 0.0f, 0.0f };
 
                 float padariaX = screenW * 0.55f; 
                 float padariaY = screenH * 0.39f;
@@ -178,12 +178,12 @@ int main(void){
                       PADARIA_SCALE,
                       WHITE);
 
-                    DrawTriangle(triangleV1, triangleV2, triangleV3, WHITE); // Bico
-                    DrawRectangleRounded(bubbleRect, roundness, segments, WHITE); // Corpo
+                    DrawTriangle(triangleV1, triangleV2, triangleV3, WHITE);
+                    DrawRectangleRounded(bubbleRect, roundness, segments, WHITE);
 
                     DrawTextEx(GetFontDefault(),
                         currentPrompt,
-                        (Vector2){ bubbleRect.x + TEXT_PADDING, bubbleRect.y + TEXT_PADDING }, // POSIÇÃO COM MARGEM
+                        (Vector2){ bubbleRect.x + TEXT_PADDING, bubbleRect.y + TEXT_PADDING },
                         24,
                         2,
                         DARKGRAY);
@@ -211,6 +211,38 @@ int main(void){
                 }
                 
             } break;
+            case FASE2: {
+                GameScreen nextScreen = UpdateDrawFase2(&gamePlayer, &mainCamera, fase1_platforms, MAX_PLATFORMS);
+                if (nextScreen != FASE2) {
+                    UnloadFase2Resources();
+                    currentScreen = nextScreen;
+                }
+            } break;
+            case GAME_OVER: {
+                BeginDrawing();
+                    ClearBackground((Color){255, 100, 100, 255});
+
+                    DrawText("GAME OVER!", screenWidth/2 - MeasureText("GAME OVER!", 60)/2, 
+                            screenHeight/2 - 100, 60, RED);
+
+                    DrawText("Você precisa coletar 8 pirulitos!", 
+                            screenWidth/2 - MeasureText("Você precisa coletar 8 pirulitos!", 20)/2,
+                            screenHeight/2, 20, DARKGRAY);
+
+                    DrawText("Pressione ENTER para tentar novamente", 
+                            screenWidth/2 - MeasureText("Pressione ENTER para tentar novamente", 20)/2,
+                            screenHeight/2 + 60, 20, BLACK);
+
+                EndDrawing();
+
+                if (IsKeyPressed(KEY_ENTER)) {
+                    LoadFase1Resources();
+                    InitFase1(&gamePlayer, fase1_platforms);
+                    candiesCollected = 0;
+                    currentScreen = FASE1;
+                }
+            } break;
+
             case ENDING_SCREEN: {
                 if (IsKeyPressed(KEY_ENTER)) {
                     currentScreen = TITLE; 

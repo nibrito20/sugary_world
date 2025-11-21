@@ -17,6 +17,8 @@ typedef enum GameScreen {
     TITLE = 0,
     CONTEXT,
     FASE1,
+    FASE2,
+    GAME_OVER,
     ENDING_SCREEN,
     EXITING
 } GameScreen;
@@ -35,9 +37,16 @@ typedef struct Candy {
     struct Candy *next;
 } Candy;
 
+extern int candiesCollected;
+
 void InitFase1(Player *player, Platform platforms[]);
 GameScreen UpdateDrawFase1(Player *player, Camera2D *camera, Platform platforms[], int numPlatforms);
 void LoadFase1Resources();
 void UnloadFase1Resources();
+
+void InitFase2(Player *player, Platform platforms[]);
+GameScreen UpdateDrawFase2(Player *player, Camera2D *camera, Platform platforms[], int numPlatforms);
+void LoadFase2Resources();
+void UnloadFase2Resources();
 
 #endif
