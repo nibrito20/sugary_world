@@ -11,6 +11,8 @@ static Texture2D backgroundTitleTexture;
 static Texture2D playerContextTexture;
 static Texture2D padariaContextTexture;
 #define CURSOR_SCALE 0.1f
+#define screenWidth 1280
+#define screenHeight  800
 
 static int currentFalas = 0;
 const char *falas[] = {
@@ -32,11 +34,14 @@ const char *falas[] = {
 
 int main(void){
 
-    const int screenWidth = 1280;
-    const int screenHeight = 800;
-
     InitWindow(screenWidth, screenHeight, "Sugary World");
     SetTargetFPS(60);
+
+    mainCamera.target = (Vector2){ 0.0f, 0.0f }; // O alvo inicial (será mudado no FASE1)
+    mainCamera.offset = (Vector2){ (float)screenWidth/2, (float)screenHeight/2 }; // Centraliza o ponto de vista na tela
+    mainCamera.rotation = 0.0f;
+    mainCamera.zoom = 1.0f;
+
     GameScreen currentScreen = TITLE;
 
     Rectangle startButton = {
@@ -108,7 +113,8 @@ int main(void){
                         currentFalas++; 
                     } else {
                         currentScreen = FASE1;
-                        //InitFase1(fase1_platforms); 
+                        LoadFase1Resources();
+                        InitFase1(&gamePlayer, fase1_platforms); 
                         currentFalas = 0;
                     }
                 }
@@ -125,7 +131,7 @@ int main(void){
 
                 Vector2 triangleV1 = { bubbleRect.x + 10, bubbleRect.y };
                 Vector2 triangleV3 = { bubbleRect.x + 30, bubbleRect.y };
-                Vector2 triangleV2 = { screenW * 0.20f, screenH * 0.60f };//pontos do vértice para o bico da box de fala
+                Vector2 triangleV2 = { screenW * 0.20f, screenH * 0.60f };
                 float roundness = 0.4f;
                 int segments = 10;
 
@@ -197,14 +203,14 @@ int main(void){
                     DrawTextureEx(cursorTexture, mousePoint, 0.0f, CURSOR_SCALE, WHITE); 
                 EndDrawing();
             } break;
-            // case FASE1:{
-            //     UpdateDrawFase1(&gamePlayer, &mainCamera, fase1_platforms, MAX_PLATFORMS);
-            //     GameScreen nextScreen = UpdateDrawFase1(&gamePlayer, &mainCamera, fase1_platforms, MAX_PLATFORMS);
-            //     if (nextScreen != FASE1) {
-            //         currentScreen = nextScreen;
-            //     }
+            case FASE1:{
+                GameScreen nextScreen = UpdateDrawFase1(&gamePlayer, &mainCamera, fase1_platforms, MAX_PLATFORMS);
+                if (nextScreen != FASE1) {
+                    UnloadFase1Resources();
+                    currentScreen = nextScreen;
+                }
                 
-            // } break;
+            } break;
             case ENDING_SCREEN: {
                 if (IsKeyPressed(KEY_ENTER)) {
                     currentScreen = TITLE; 
@@ -225,6 +231,7 @@ int main(void){
     UnloadTexture(playerContextTexture);
     UnloadTexture(padariaContextTexture);
     UnloadTexture(backgroundContextTexture);
+    UnloadTexture(backgroundTitleTexture);
     ShowCursor();
     CloseWindow();
     return 0;
