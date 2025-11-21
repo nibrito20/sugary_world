@@ -4,8 +4,8 @@
 #include "raylib.h"
 
 #define PLAYER_SPEED 200.0f
-#define PLAYER_GRAVITY 2500.0f
-#define PLAYER_JUMP_FORCE -500.0f
+#define PLAYER_JUMP_FORCE -750.0f
+#define PLAYER_GRAVITY 2000.0f
 #define MAX_PLATFORMS 50
 
 typedef struct Platform {
@@ -28,6 +28,12 @@ typedef struct Player {
     float velocityY;
     bool isOnGround;
 } Player;
+
+typedef struct Candy {
+    Vector2 position;
+    Rectangle rect;
+    struct Candy *next;
+} Candy;
 
 void InitFase1(Player *player, Platform platforms[]);
 GameScreen UpdateDrawFase1(Player *player, Camera2D *camera, Platform platforms[], int numPlatforms);
