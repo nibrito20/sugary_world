@@ -1,12 +1,11 @@
 # Sugary World
 
-Sugary World é um jogo de plataforma em C, inspirado em Mário, onde o jogador controla um personagem que precisa saltar entre plataformas, coletar itens e evitar obstáculos para avançar nos níveis.
+Sugary World é um jogo de plataforma em C, inspirado em Mário, onde o jogador controla um personagem que precisa saltar entre plataformas e coletar itens para avançar nos níveis.
 
 ## Funcionalidades
 
 - Movimentação lateral com setas do teclado
 - Pulo com física realista
-- Diferentes níveis de dificuldade
 
 ## Controles
 

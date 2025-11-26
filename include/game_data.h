@@ -20,16 +20,16 @@ typedef enum GameScreen {
     FINAL,
     QUIZ_FINAL,
     GAME_OVER,
-    ENDING_SCREEN,
+    TELA_FINAL,
     EXITING
 } GameScreen;
 
 typedef struct Player {
     Texture2D texture;
-    Vector2 pos;
+    Vector2 posicaoXY;
     float scale;
-    float velocityY;
-    bool isOnGround;
+    float velocidade_vertical;
+    bool estaNoChao;
 } Player;
 
 typedef struct Candy {
@@ -38,7 +38,7 @@ typedef struct Candy {
     struct Candy *next;
 } Candy;
 
-extern int candiesCollected;
+extern int DOCES_COLETADOS;
 
 void InitFase1(Player *player, Platform platforms[]);
 GameScreen UpdateDrawFase1(Player *player, Camera2D *camera, Platform platforms[], int numPlatforms);

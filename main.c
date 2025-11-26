@@ -16,11 +16,11 @@ Texture2D fundo_final;
 Music musica; 
 
 #define CURSOR_ESCALA 0.1f
-#define screenWidth 1280
-#define screenHeight  800
+#define LARGURA_TELA 1280
+#define ALTURA_TELA  800
 
-int currentFalas = 0;
-int currentFalas2 = 0;
+int FALA_ATUAL1 = 0;
+int FALA_ATUAL2 = 0;
 int derrota = 0; 
 
 const char *falas[] = {
@@ -92,7 +92,7 @@ int ChecarRespostaQuiz(FILE *gabarito, FILE *resposta){
 
 int main(void){
 
-    InitWindow(screenWidth, screenHeight, "Sugary World");
+    InitWindow(LARGURA_TELA, ALTURA_TELA, "Sugary World");
     InitAudioDevice();
     musica = LoadMusicStream("audio/musica.mp3");
     PlayMusicStream(musica);
@@ -100,68 +100,68 @@ int main(void){
     SetTargetFPS(60);
 
     camera.target = (Vector2){ 0.0f, 0.0f };
-    camera.offset = (Vector2){ (float)screenWidth/2, (float)screenHeight/2 };
+    camera.offset = (Vector2){ (float)LARGURA_TELA/2, (float)ALTURA_TELA/2 };
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
 
-    GameScreen currentScreen = TITLE;
+    GameScreen TELA_ATUAL = TITLE;
 
-    Rectangle startButton = {
-        (float)screenWidth/2 - 150,
-        (float)screenHeight/2 + 50,
+    Rectangle BOTAO_INICIAR = {
+        (float)LARGURA_TELA/2 - 150,
+        (float)ALTURA_TELA/2 + 50,
         300,
         60
     };
 
-    Color buttonColor = PINK;
-    Color hoverColor = SKYBLUE;
+    Color COR_BOTAO = PINK;
+    Color COR_DESTAQUE = SKYBLUE;
     HideCursor();
 
     textura_cursor = LoadTexture("sprites/cursor.png"); 
     fundo_contexto = LoadTexture("sprites/fundo_contexto.png");
     fundo_tela_titulo = LoadTexture("sprites/fundo_tela_titulo.png");
     taylorTextura = LoadTexture("sprites/taylor_frente.png");
-    padariaContextTexture = LoadTexture("sprites/padaria_context.png");
+    padariaContextTexture = LoadTexture("sprites/padaria_contexto.png");
     kane = LoadTexture("sprites/kane.png");
     fundo_final = LoadTexture("sprites/fundo_final.jpeg");
 
-    while(currentScreen != EXITING && !WindowShouldClose()){
+    while(TELA_ATUAL != EXITING && !WindowShouldClose()){
         UpdateMusicStream(musica);
         Vector2 ponto_mouse = GetMousePosition();
-        switch(currentScreen){
+        switch(TELA_ATUAL){
 
             case TITLE:{
-                const float screenW = (float)screenWidth;
-                const float screenH = (float)screenHeight;
-                Color btnDrawColor = buttonColor;
-                bool isMouseOver = CheckCollisionPointRec(ponto_mouse, startButton);
+                const float telaL = (float)LARGURA_TELA;
+                const float telaA = (float)ALTURA_TELA;
+                Color COR_DESENHO_BOTAO = COR_BOTAO;
+                bool MOUSE_EM_CIMA = CheckCollisionPointRec(ponto_mouse, BOTAO_INICIAR);
 
-                if (isMouseOver) {
-                    btnDrawColor = hoverColor;
+                if (MOUSE_EM_CIMA) {
+                    COR_DESENHO_BOTAO = COR_DESTAQUE;
                     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-                        currentScreen = CONTEXT;
+                        TELA_ATUAL = CONTEXT;
                     }
                 }
 
-                Rectangle sourceRec = { 0.0f, 0.0f, (float)fundo_tela_titulo.width, (float)fundo_tela_titulo.height };
-                Rectangle destRec = { 0.0f, 0.0f, screenW, screenH };
-                Vector2 origin = { 0.0f, 0.0f };
+                Rectangle RECORTE_ORIGEM = { 0.0f, 0.0f, (float)fundo_tela_titulo.width, (float)fundo_tela_titulo.height };
+                Rectangle RECORTE_DESTINO = { 0.0f, 0.0f, telaL, telaA };
+                Vector2 PONTO_ORIGEM = { 0.0f, 0.0f };
 
                 BeginDrawing();  
                     ClearBackground(RAYWHITE);
 
                     DrawTexturePro(fundo_tela_titulo,
-                       sourceRec,
-                       destRec,
-                       origin,
+                       RECORTE_ORIGEM,
+                       RECORTE_DESTINO,
+                       PONTO_ORIGEM,
                        0.0f,              
                        WHITE);
                             
-                    DrawRectangleRec(startButton, btnDrawColor);
+                    DrawRectangleRec(BOTAO_INICIAR, COR_DESENHO_BOTAO);
 
                     DrawText("COMEÇAR JOGO", 
-                             startButton.x + startButton.width/2 - MeasureText("COMEÇAR JOGO", 30)/2, 
-                             startButton.y + 15, 30, RAYWHITE);
+                             BOTAO_INICIAR.x + BOTAO_INICIAR.width/2 - MeasureText("COMEÇAR JOGO", 30)/2, 
+                             BOTAO_INICIAR.y + 15, 30, RAYWHITE);
 
                     DrawTextureEx(
                         textura_cursor,
@@ -176,60 +176,60 @@ int main(void){
 
             case CONTEXT:{
                 if (IsKeyPressed(KEY_ENTER) || IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-                    if (currentFalas < NUM_FALAS - 1) {
-                        currentFalas++; 
+                    if (FALA_ATUAL1 < NUM_FALAS - 1) {
+                        FALA_ATUAL1++; 
                     } else {
-                        currentScreen = FASE1;
+                        TELA_ATUAL = FASE1;
                         LoadFase1Resources();
                         InitFase1(&personagem_principal, fase1_platforms); 
-                        currentFalas = 0;
+                        FALA_ATUAL1 = 0;
                     }
                 }
-                const float screenW = (float)screenWidth;
-                const float screenH = (float)screenHeight;
+                const float telaL = (float)LARGURA_TELA;
+                const float telaA = (float)ALTURA_TELA;
 
-                const char *currentPrompt = falas[currentFalas];
-                Rectangle bubbleRect = {
-                    screenW * 0.20f,
-                    screenH * 0.40f,
-                    screenW * 0.35f,
-                    screenH * 0.15f
+                const char *TEXTO_ATUAL = falas[FALA_ATUAL1];
+                Rectangle RETANGULO_BALAO = {
+                    telaL * 0.20f,
+                    telaA * 0.40f,
+                    telaL * 0.35f,
+                    telaA * 0.15f
                 };
 
-                Vector2 triangleV1 = { bubbleRect.x + 10, bubbleRect.y };
-                Vector2 triangleV3 = { bubbleRect.x + 30, bubbleRect.y };
-                Vector2 triangleV2 = { screenW * 0.20f, screenH * 0.60f };
-                float roundness = 0.4f;
-                int segments = 10;
+                Vector2 PONTA1 = { RETANGULO_BALAO.x + 10, RETANGULO_BALAO.y };
+                Vector2 PONTA_BASE = { RETANGULO_BALAO.x + 30, RETANGULO_BALAO.y };
+                Vector2 PONTO2 = { telaL * 0.20f, telaA * 0.60f };
+                float arredondamento = 0.4f;
+                int segmentos = 10;
 
-                const float TEXT_PADDING = 20.0f; 
+                const float MARGEM_TEXTO = 20.0f; 
                     
-                Rectangle textRect = {
-                    bubbleRect.x + TEXT_PADDING, 
-                    bubbleRect.y + TEXT_PADDING,
-                    bubbleRect.width - (TEXT_PADDING * 2),
-                    bubbleRect.height - (TEXT_PADDING * 2)
+                Rectangle AREA_TEXTO = {
+                    RETANGULO_BALAO.x + MARGEM_TEXTO, 
+                    RETANGULO_BALAO.y + MARGEM_TEXTO,
+                    RETANGULO_BALAO.width - (MARGEM_TEXTO * 2),
+                    RETANGULO_BALAO.height - (MARGEM_TEXTO * 2)
                 };
                     
-                Rectangle sourceRec = { 0.0f, 0.0f, (float)fundo_contexto.width, (float)fundo_contexto.height }; 
-                Rectangle destRec = { 0.0f, 0.0f, screenW, screenH };
-                Vector2 origin = { 0.0f, 0.0f };
+                Rectangle RECORTE_ORIGEM = { 0.0f, 0.0f, (float)fundo_contexto.width, (float)fundo_contexto.height }; 
+                Rectangle RECORTE_DESTINO = { 0.0f, 0.0f, telaL, telaA };
+                Vector2 PONTO_ORIGEM = { 0.0f, 0.0f };
 
-                float padariaX = screenW * 0.55f; 
-                float padariaY = screenH * 0.39f;
+                float padariaX = telaL * 0.55f; 
+                float padariaY = telaA * 0.39f;
                 const float PADARIA_SCALE = 0.4f;
 
-                float bonecaX = screenW * 0.08f;
-                float bonecaY = screenH * 0.60f;
+                float bonecaX = telaL * 0.08f;
+                float bonecaY = telaA * 0.60f;
                 const float BONECA_SCALE = 7.0f;
 
                 BeginDrawing();
                     ClearBackground(RAYWHITE);
                     
                     DrawTexturePro(fundo_contexto,
-                       sourceRec,
-                       destRec,
-                       origin,
+                       RECORTE_ORIGEM,
+                       RECORTE_DESTINO,
+                       PONTO_ORIGEM,
                        0.0f,              
                        WHITE);
 
@@ -245,24 +245,24 @@ int main(void){
                       PADARIA_SCALE,
                       WHITE);
 
-                    DrawTriangle(triangleV1, triangleV2, triangleV3, WHITE);
-                    DrawRectangleRounded(bubbleRect, roundness, segments, WHITE);
+                    DrawTriangle(PONTA1, PONTO2, PONTA_BASE, WHITE);
+                    DrawRectangleRounded(RETANGULO_BALAO, arredondamento, segmentos, WHITE);
 
                     DrawTextEx(GetFontDefault(),
-                        currentPrompt,
-                        (Vector2){ bubbleRect.x + TEXT_PADDING, bubbleRect.y + TEXT_PADDING },
+                        TEXTO_ATUAL,
+                        (Vector2){ RETANGULO_BALAO.x + MARGEM_TEXTO, RETANGULO_BALAO.y + MARGEM_TEXTO },
                         24,
                         2,
                         DARKGRAY);
                     
-                    const char *actionText;
-                    if (currentFalas < NUM_FALAS - 1) {
-                        actionText = "Pressione ENTER/Clique para a próxima fala...";
+                    const char *TEXTO_ACAO;
+                    if (FALA_ATUAL1 < NUM_FALAS - 1) {
+                        TEXTO_ACAO = "Pressione ENTER/Clique para a próxima fala...";
                     } else {
-                        actionText = "Pressione ENTER/Clique para começar a aventura!";
+                        TEXTO_ACAO = "Pressione ENTER/Clique para começar a aventura!";
                     }
-                    DrawText(actionText, 
-                        screenWidth/2 - MeasureText(actionText, 20)/2,
+                    DrawText(TEXTO_ACAO, 
+                        LARGURA_TELA/2 - MeasureText(TEXTO_ACAO, 20)/2,
                         30, 
                         20, 
                         MAROON);
@@ -272,49 +272,49 @@ int main(void){
             } break;
 
             case FASE1:{
-                GameScreen nextScreen = UpdateDrawFase1(&personagem_principal, &camera, fase1_platforms, MAX_PLATFORMS);
-                if (nextScreen != FASE1) {
+                GameScreen PROXIMA_TELA = UpdateDrawFase1(&personagem_principal, &camera, fase1_platforms, MAX_PLATFORMS);
+                if (PROXIMA_TELA != FASE1) {
                     UnloadFase1Resources();
                     derrota = 0;
-                    currentScreen = nextScreen;
+                    TELA_ATUAL = PROXIMA_TELA;
                 }
             } break;
 
             case FINAL:{
                 if (IsKeyPressed(KEY_ENTER) || IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-                    if (currentFalas2 < NUM_FALAS2 - 1) {
-                        currentFalas2++;
+                    if (FALA_ATUAL2 < NUM_FALAS2 - 1) {
+                        FALA_ATUAL2++;
                     } else {
-                        currentScreen = QUIZ_FINAL;
-                        currentFalas2 = 0;
+                        TELA_ATUAL = QUIZ_FINAL;
+                        FALA_ATUAL2 = 0;
                     }
                 }
 
-                const float screenW = (float)screenWidth;
-                const float screenH = (float)screenHeight;
+                const float telaL = (float)LARGURA_TELA;
+                const float telaA = (float)ALTURA_TELA;
 
-                const char *currentPrompt = falas2[currentFalas2];
+                const char *TEXTO_ATUAL = falas2[FALA_ATUAL2];
 
-                const float BUBBLE_WIDTH = screenW * 0.30f;
-                const float BUBBLE_HEIGHT = screenH * 0.15f;
+                const float LARGURA_BALAO = telaL * 0.30f;
+                const float ALTURA_BALAO = telaA * 0.15f;
 
-                Rectangle bubbleRect = {
-                    (screenW - BUBBLE_WIDTH) / 2.0f,
-                    screenH * 0.65f, 
-                    BUBBLE_WIDTH,
-                    BUBBLE_HEIGHT
+                Rectangle RETANGULO_BALAO = {
+                    (telaL - LARGURA_BALAO) / 2.0f,
+                    telaA * 0.65f, 
+                    LARGURA_BALAO,
+                    ALTURA_BALAO
                 };
 
-                const float TEXT_PADDING = 20.0f;
-                float roundness = 0.4f;
-                int segments = 10;
+                const float MARGEM_TEXTO = 20.0f;
+                float arredondamento = 0.4f;
+                int segmentos = 10;
 
-                float taylorX = screenW * 0.10f; 
-                float taylorY = screenH * 0.70f;
+                float taylorX = telaL * 0.10f; 
+                float taylorY = telaA * 0.70f;
                 const float TAYLOR_ESCALA = 8.5f; 
                 
-                float kaneX = screenW * 0.70f;
-                float kaneY = screenH * 0.50f;
+                float kaneX = telaL * 0.70f;
+                float kaneY = telaA * 0.50f;
                 const float KANE_ESCALA = 7.0f;
 
                 BeginDrawing();
@@ -322,7 +322,7 @@ int main(void){
                     DrawTexturePro(
                         fundo_final,
                         (Rectangle){ 0, 0, fundo_final.width, fundo_final.height },
-                        (Rectangle){ 0, 0, screenWidth, screenHeight },
+                        (Rectangle){ 0, 0, LARGURA_TELA, ALTURA_TELA },
                         (Vector2){ 0, 0 },
                         0.0f,
                         WHITE
@@ -340,19 +340,19 @@ int main(void){
                       KANE_ESCALA,
                       WHITE);
                     
-                    DrawRectangleRounded(bubbleRect, roundness, segments, WHITE);
+                    DrawRectangleRounded(RETANGULO_BALAO, arredondamento, segmentos, WHITE);
 
                     DrawTextEx(GetFontDefault(),
-                        currentPrompt,
-                        (Vector2){ bubbleRect.x + TEXT_PADDING, bubbleRect.y + TEXT_PADDING },
+                        TEXTO_ATUAL,
+                        (Vector2){ RETANGULO_BALAO.x + MARGEM_TEXTO, RETANGULO_BALAO.y + MARGEM_TEXTO },
                         24,
                         2,
                         BLACK);
                     
-                    const char *actionText = "Pressione ENTER/Clique para continuar...";
+                    const char *TEXTO_ACAO = "Pressione ENTER/Clique para continuar...";
                     
-                    DrawText(actionText, 
-                        screenWidth/2 - MeasureText(actionText, 20)/2,
+                    DrawText(TEXTO_ACAO, 
+                        LARGURA_TELA/2 - MeasureText(TEXTO_ACAO, 20)/2,
                         30, 
                         20, 
                         MAROON);
@@ -365,8 +365,8 @@ int main(void){
 
                 Vector2 ponto_do_mouse = GetMousePosition();
                 bool respondida = false;
-                const float largura_da_tela = (float)screenWidth;
-                const float altura_da_tela = (float)screenHeight;
+                const float largura_da_tela = (float)LARGURA_TELA;
+                const float altura_da_tela = (float)ALTURA_TELA;
 
                 float totalQuizAltura = (2 * BOTAO_ALTURA) + BOTAO_PADDING;
                 float totalQuizLargura = (2 * BOTAO_LARGURA) + BOTAO_PADDING;
@@ -433,10 +433,10 @@ int main(void){
                     fclose(resposta);
 
                     if(resul == 1){
-                        currentScreen = ENDING_SCREEN;
+                        TELA_ATUAL = TELA_FINAL;
                     } else{
                         derrota = 1;
-                        currentScreen = GAME_OVER;
+                        TELA_ATUAL = GAME_OVER;
                     }
                 }
             } break;
@@ -447,29 +447,29 @@ int main(void){
                     ClearBackground((Color){255, 100, 100, 255});
 
                     DrawText("GAME OVER!",
-                            screenWidth/2 - MeasureText("GAME OVER!", 60)/2,
-                            screenHeight/2 - 100,
+                            LARGURA_TELA/2 - MeasureText("GAME OVER!", 60)/2,
+                            ALTURA_TELA/2 - 100,
                             60,
                             RED);
 
                     if (derrota == 0) {
                         DrawText("Você precisa coletar 8 pirulitos!",
-                                screenWidth/2 - MeasureText("Você precisa coletar 8 pirulitos!", 20)/2,
-                                screenHeight/2,
+                                LARGURA_TELA/2 - MeasureText("Você precisa coletar 8 pirulitos!", 20)/2,
+                                ALTURA_TELA/2,
                                 20,
                                 DARKGRAY);
                     }
                     else if (derrota == 1) {
                         DrawText("Preste atenção em qual ingrediente não faz parte da receita!",
-                                screenWidth/2 - MeasureText("Preste atenção em qual ingrediente não faz parte da receita!", 20)/2,
-                                screenHeight/2,
+                                LARGURA_TELA/2 - MeasureText("Preste atenção em qual ingrediente não faz parte da receita!", 20)/2,
+                                ALTURA_TELA/2,
                                 20,
                                 DARKGRAY);
                     }
 
                     DrawText("Pressione ENTER para tentar novamente",
-                            screenWidth/2 - MeasureText("Pressione ENTER para tentar novamente", 20)/2,
-                            screenHeight/2 + 60,
+                            LARGURA_TELA/2 - MeasureText("Pressione ENTER para tentar novamente", 20)/2,
+                            ALTURA_TELA/2 + 60,
                             20,
                             BLACK);
 
@@ -480,32 +480,32 @@ int main(void){
                     if (derrota == 0) {
                         LoadFase1Resources();
                         InitFase1(&personagem_principal, fase1_platforms);
-                        candiesCollected = 0;
-                        currentScreen = FASE1;
+                        DOCES_COLETADOS = 0;
+                        TELA_ATUAL = FASE1;
                     }
                     else if (derrota == 1) {
-                        currentScreen = CONTEXT;
+                        TELA_ATUAL = CONTEXT;
                     }
                 }
 
             } break;
 
-            case ENDING_SCREEN: {
+            case TELA_FINAL: {
                 if (IsKeyPressed(KEY_ENTER)) {
-                    currentScreen = TITLE; 
+                    TELA_ATUAL = TITLE; 
                 }
                 
                 BeginDrawing();
                     ClearBackground(GREEN);
                     DrawText("VOCÊ VENCEU!",
-                        screenWidth/2 - MeasureText("VOCÊ VENCEU!", 60)/2,
-                        screenHeight/2 - 100,
+                        LARGURA_TELA/2 - MeasureText("VOCÊ VENCEU!", 60)/2,
+                        ALTURA_TELA/2 - 100,
                         60,
                         WHITE
                     );
                     DrawText("Pressione ENTER para jogar novamente ou ESC para fechar o jogo",
-                            screenWidth/2 - MeasureText("Pressione ENTER para jogar novamente ou ESC para fechar o jogo", 20)/2,
-                            screenHeight/2 + 60,
+                            LARGURA_TELA/2 - MeasureText("Pressione ENTER para jogar novamente ou ESC para fechar o jogo", 20)/2,
+                            ALTURA_TELA/2 + 60,
                             20,
                             BLACK);
 
