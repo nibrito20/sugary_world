@@ -18,9 +18,17 @@ Sugary World é um jogo de plataforma em C, inspirado em Mário, onde o jogador 
 - Biblioteca Raylib
 - Sistema operacional: macOS
 
+## Instalar Raylib
+
+Rode no terminal do seu computador
+
+````
+brew install raylib
+````
+
 ## Como Compilar e Rodar
 
-```a
+````
 # Clonar repositório
 git clone https://github.com/nibrito20/sugary_world.git
 cd sugary_world
@@ -33,6 +41,6 @@ make run
 
 # Limpar arquivos compilados
 make clean
-```
+````
 
 ⚠️ *Certifique-se de ter o GCC e a Raylib instalados antes de rodar make.*
