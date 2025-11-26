@@ -13,6 +13,7 @@ Texture2D fundo_tela_titulo;
 Texture2D playerContextTexture;
 Texture2D padariaContextTexture;
 Texture2D fundo_final;
+Music musica; 
 
 #define CURSOR_ESCALA 0.1f
 #define screenWidth 1280
@@ -92,6 +93,10 @@ int ChecarRespostaQuiz(FILE *gabarito, FILE *resposta){
 int main(void){
 
     InitWindow(screenWidth, screenHeight, "Sugary World");
+    InitAudioDevice();
+    musica = LoadMusicStream("audio/musica.mp3");
+    PlayMusicStream(musica);
+    SetMusicVolume(musica, 1.0f); 
     SetTargetFPS(60);
 
     camera.target = (Vector2){ 0.0f, 0.0f };
@@ -121,14 +126,15 @@ int main(void){
     fundo_final = LoadTexture("sprites/fundo_final.jpeg");
 
     while(currentScreen != EXITING && !WindowShouldClose()){
-        Vector2 mousePoint = GetMousePosition();
+        UpdateMusicStream(musica);
+        Vector2 ponto_mouse = GetMousePosition();
         switch(currentScreen){
 
             case TITLE:{
                 const float screenW = (float)screenWidth;
                 const float screenH = (float)screenHeight;
                 Color btnDrawColor = buttonColor;
-                bool isMouseOver = CheckCollisionPointRec(mousePoint, startButton);
+                bool isMouseOver = CheckCollisionPointRec(ponto_mouse, startButton);
 
                 if (isMouseOver) {
                     btnDrawColor = hoverColor;
@@ -159,7 +165,7 @@ int main(void){
 
                     DrawTextureEx(
                         textura_cursor,
-                        mousePoint,
+                        ponto_mouse,
                         0.0f,
                         CURSOR_ESCALA,
                         WHITE
@@ -261,7 +267,7 @@ int main(void){
                         20, 
                         MAROON);
                                
-                    DrawTextureEx(textura_cursor, mousePoint, 0.0f, CURSOR_ESCALA, WHITE); 
+                    DrawTextureEx(textura_cursor, ponto_mouse, 0.0f, CURSOR_ESCALA, WHITE); 
                 EndDrawing();
             } break;
 
@@ -351,7 +357,7 @@ int main(void){
                         20, 
                         MAROON);
                                
-                    DrawTextureEx(textura_cursor, mousePoint, 0.0f, CURSOR_ESCALA, WHITE); 
+                    DrawTextureEx(textura_cursor, ponto_mouse, 0.0f, CURSOR_ESCALA, WHITE); 
                 EndDrawing();
             }break;
 
@@ -518,6 +524,8 @@ int main(void){
     UnloadTexture(fundo_tela_titulo);
     UnloadTexture(kane);
     UnloadTexture(fundo_final);
+    UnloadMusicStream(musica);
+    CloseAudioDevice();
     ShowCursor();
     CloseWindow();
     return 0;
