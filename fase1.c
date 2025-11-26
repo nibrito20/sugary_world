@@ -5,8 +5,19 @@
 
 Texture2D floorTexture = {0};
 Texture2D  waffleTexture = {0};
-Texture2D playerTexture = {0};
 Texture2D candyTexture = {0};
+Texture2D taylor = {0};
+Texture2D taylor_esquerda = {0};
+
+int totalFrames_taylor = 6;
+int frameLargura_taylor;
+int frameAltura_taylor;
+
+Rectangle frameRec_taylor = {0};
+
+int currentFrame_taylor = 0;
+float frameTempo_taylor = 0.0f;
+float frameVelocidade_taylor = 0.12f;
 
 float mensagemContador = 0.0f;
 const float mensagemTempo = 5.0f;
@@ -56,8 +67,12 @@ void ClearAllCandies(void) {
 void LoadFase1Resources(){
     floorTexture = LoadTexture("sprites/floorFase1.png");
     waffleTexture = LoadTexture("sprites/platformWaffle.png");
-    playerTexture = LoadTexture("sprites/taylor_direita.png");
     candyTexture = LoadTexture("sprites/pirulito.png");
+    taylor = LoadTexture("sprites/taylor.png");
+    taylor_esquerda = LoadTexture("sprites/taylor_esquerda.png");
+    frameLargura_taylor = taylor.width / totalFrames_taylor;
+    frameAltura_taylor = taylor.height;
+    frameRec_taylor = (Rectangle){0, 0, frameLargura_taylor, frameAltura_taylor};
 }
 
 void InitFase1(Player *player, Platform platforms[]){
@@ -115,8 +130,7 @@ void InitFase1(Player *player, Platform platforms[]){
     platforms[16].rect = (Rectangle){ 2350, 350, 600, floorTexture.height };
     platforms[16].texture = floorTexture;
 
-
-    player->texture = playerTexture;
+    player->texture = taylor;
     player->pos = (Vector2){100, 356};
     player->scale = 2.0f;
     player->velocityY = 0.0f;
@@ -162,9 +176,6 @@ GameScreen UpdateDrawFase1(Player *player, Camera2D *camera, Platform platforms[
     if (IsKeyReleased(KEY_UP) && player->velocityY < 0) {
         player->velocityY *= 0.35f;
     }
-
-    float playerRealHeight = playerTexture.height * player->scale;
-    float playerRealWidth  = playerTexture.width * player->scale;
 
     float newPosY = player->pos.y + player->velocityY * deltaTime;
     player->isOnGround = false;
@@ -273,11 +284,45 @@ GameScreen UpdateDrawFase1(Player *player, Camera2D *camera, Platform platforms[
                 draw = draw->next;
             }
 
-            DrawTextureEx(
-                player->texture, 
-                (Vector2){ player->pos.x, player->pos.y},
-                0.0f, 
-                player->scale, 
+            if (IsKeyDown(KEY_RIGHT)) {
+                player->texture = taylor;
+                frameLargura_taylor = taylor.width / totalFrames_taylor;
+                frameAltura_taylor  = taylor.height;
+                frameRec_taylor.height = frameAltura_taylor;
+                frameRec_taylor.width  = frameLargura_taylor;
+            }
+
+            if (IsKeyDown(KEY_LEFT)) {
+                player->texture = taylor_esquerda;
+                frameLargura_taylor = taylor_esquerda.width / totalFrames_taylor;
+                frameAltura_taylor  = taylor_esquerda.height;
+                frameRec_taylor.height = frameAltura_taylor;
+                frameRec_taylor.width  = frameLargura_taylor;
+            }
+
+
+            if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_LEFT)) {
+
+                frameTempo_taylor += deltaTime;
+                if (frameTempo_taylor >= frameVelocidade_taylor) {
+                    frameTempo_taylor = 0.0f;
+                    currentFrame_taylor++;
+
+                    if (currentFrame_taylor >= totalFrames_taylor) currentFrame_taylor = 0;
+                    frameRec_taylor.x = currentFrame_taylor * frameLargura_taylor;
+                }
+            } else {
+                currentFrame_taylor = 0;
+                frameRec_taylor.x = 0;
+            }
+
+
+            DrawTexturePro(
+                player->texture,
+                frameRec_taylor,
+                (Rectangle){ player->pos.x, player->pos.y, frameRec_taylor.width * player->scale, frameRec_taylor.height * player->scale },
+                (Vector2){0,0},
+                0.0f,
                 WHITE
             );
 
@@ -289,7 +334,7 @@ GameScreen UpdateDrawFase1(Player *player, Camera2D *camera, Platform platforms[
 void UnloadFase1Resources(void){
     ClearAllCandies();
     UnloadTexture(floorTexture);
-    UnloadTexture(playerTexture);
+    UnloadTexture(taylor);
     UnloadTexture(waffleTexture);
     UnloadTexture(candyTexture);
 }

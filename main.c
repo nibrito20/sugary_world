@@ -10,7 +10,7 @@ Platform fase1_platforms[MAX_PLATFORMS];
 Texture2D textura_cursor;
 Texture2D fundo_contexto;
 Texture2D fundo_tela_titulo;
-Texture2D playerContextTexture;
+Texture2D taylorTextura;
 Texture2D padariaContextTexture;
 Texture2D fundo_final;
 Music musica; 
@@ -120,7 +120,7 @@ int main(void){
     textura_cursor = LoadTexture("sprites/cursor.png"); 
     fundo_contexto = LoadTexture("sprites/fundo_contexto.png");
     fundo_tela_titulo = LoadTexture("sprites/fundo_tela_titulo.png");
-    playerContextTexture = LoadTexture("sprites/taylor_frente.png");
+    taylorTextura = LoadTexture("sprites/taylor_frente.png");
     padariaContextTexture = LoadTexture("sprites/padaria_context.png");
     kane = LoadTexture("sprites/kane.png");
     fundo_final = LoadTexture("sprites/fundo_final.jpeg");
@@ -233,7 +233,7 @@ int main(void){
                        0.0f,              
                        WHITE);
 
-                    DrawTextureEx(playerContextTexture, 
+                    DrawTextureEx(taylorTextura, 
                       (Vector2){bonecaX, bonecaY},
                       0.0f,
                       BONECA_SCALE,
@@ -328,7 +328,7 @@ int main(void){
                         WHITE
                     );
                     
-                    DrawTextureEx(playerContextTexture,
+                    DrawTextureEx(taylorTextura,
                       (Vector2){taylorX, taylorY},
                       0.0f,
                       TAYLOR_ESCALA,
@@ -467,7 +467,7 @@ int main(void){
                                 DARKGRAY);
                     }
 
-                    DrawText("Pressione ENTER para tentar novamenteo",
+                    DrawText("Pressione ENTER para tentar novamente",
                             screenWidth/2 - MeasureText("Pressione ENTER para tentar novamente", 20)/2,
                             screenHeight/2 + 60,
                             20,
@@ -518,7 +518,7 @@ int main(void){
         }
     }
     UnloadTexture(textura_cursor);
-    UnloadTexture(playerContextTexture);
+    UnloadTexture(taylorTextura);
     UnloadTexture(padariaContextTexture);
     UnloadTexture(fundo_contexto);
     UnloadTexture(fundo_tela_titulo);
