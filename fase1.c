@@ -3,10 +3,10 @@
 #include "raylib.h"
 #include "game_data.h"
 
-static Texture2D floorTexture = {0};
-static Texture2D  waffleTexture = {0};
-static Texture2D playerTexture = {0};
-static Texture2D candyTexture = {0};
+Texture2D floorTexture = {0};
+Texture2D  waffleTexture = {0};
+Texture2D playerTexture = {0};
+Texture2D candyTexture = {0};
 
 float mensagemContador = 0.0f;
 const float mensagemTempo = 5.0f;
@@ -193,7 +193,7 @@ GameScreen UpdateDrawFase1(Player *player, Camera2D *camera, Platform platforms[
             
             if (i == 16) {
                 if (candiesCollected >= 8) {
-                    return FASE2;
+                    return FINAL;
                 } else {
                     return GAME_OVER;
                 }
